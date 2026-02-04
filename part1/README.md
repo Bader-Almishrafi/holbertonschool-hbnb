@@ -1,37 +1,64 @@
-High-Level Package Diagram – HBnB Application
+# HBnB Evolution – Part 1: Technical Documentation
 
-This diagram presents a high-level architectural overview of the HBnB application based on a three-layer architecture. The design clearly separates responsibilities across layers and uses the Facade pattern to simplify communication between them.
+## Overview
+This repository contains the first phase of the **HBnB Evolution** project.  
+The goal of this part is to design and document the system architecture before starting the implementation.
 
-Presentation Layer
+The documentation focuses on defining a clear structure for the application using UML diagrams, ensuring proper separation of concerns and a solid foundation for future development stages.
 
-The Presentation Layer represents the entry point of the application and handles all interactions with users. It includes:
+---
 
-Services / APIs responsible for receiving client requests and returning responses.
+## Architecture Overview
+The HBnB application follows a **three-layer architecture**:
 
-Basic request handling and data transfer.
+- **Presentation Layer**
+- **Business Logic Layer**
+- **Persistence Layer**
 
-This layer does not contain business rules. Instead, it communicates with the Business Logic Layer exclusively through the Facade pattern, ensuring a clean separation of concerns.
+The communication between layers is organized using the **Facade design pattern**, which provides a unified interface and reduces coupling between components.
 
-Business Logic Layer
+---
 
-The Business Logic Layer contains the core logic of the application and represents the central part of the system. It includes:
+## High-Level Package Diagram
+The following diagram illustrates the overall structure of the application and the interaction between its layers.
 
-A Model component that manages application behavior.
+![High-Level Package Diagram](./0.%20High-Level%20Package%20Diagram.png)
 
-Core entities: User, Place, Review, and Amenity.
+### Layer Responsibilities
 
-This layer enforces all business rules and coordinates operations between entities before interacting with the Persistence Layer.
+#### Presentation Layer
+Handles user interaction through APIs and services.  
+This layer receives requests, forwards them to the Business Logic layer via the Facade, and returns responses to the user.
 
-Persistence Layer
+#### Business Logic Layer
+Contains the core application logic and domain models:
+- User
+- Place
+- Review
+- Amenity
 
-The Persistence Layer is responsible for data storage and retrieval. It includes:
+This layer enforces business rules and coordinates operations between entities.
 
-Repositories and database access components.
+#### Persistence Layer
+Manages data storage and retrieval.  
+It includes repositories and database access components responsible for performing CRUD operations while remaining isolated from the upper layers.
 
-Direct communication with the database to perform CRUD operations.
+---
 
-This layer is isolated from the Presentation Layer, ensuring that data access concerns remain independent from user interaction logic.
+## Design Pattern
+### Facade Pattern
+The Facade pattern is used to simplify communication between the Presentation Layer and the Business Logic Layer by exposing a single unified interface.  
+This approach improves maintainability, readability, and scalability of the system.
 
-Facade Pattern
+---
 
-The Facade pattern acts as a unified interface between the Presentation Layer and the Business Logic Layer. It reduces coupling between layers, improves maintainability, and provides a clear and structured flow of data across the system.
+## Project Status
+- [x] High-Level Package Diagram (Task 0 – Initial version)
+- [ ] Detailed Class Diagram
+- [ ] Sequence Diagrams
+- [ ] Full Technical Documentation
+
+---
+
+## Notes
+This documentation will be continuously refined and expanded as the project progresses through the next phases.
