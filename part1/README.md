@@ -49,16 +49,3 @@ It includes repositories and database access components responsible for performi
 ### Facade Pattern
 The Facade pattern is used to simplify communication between the Presentation Layer and the Business Logic Layer by exposing a single unified interface.  
 This approach improves maintainability, readability, and scalability of the system.
-
----
-
-## Project Status
-- [x] High-Level Package Diagram (Task 0 – Initial version)
-- [ ] Detailed Class Diagram
-- [ ] Sequence Diagrams
-- [ ] Full Technical Documentation
-
----
-
-## Notes
-This documentation will be continuously refined and expanded as the project progresses through the next phases.
