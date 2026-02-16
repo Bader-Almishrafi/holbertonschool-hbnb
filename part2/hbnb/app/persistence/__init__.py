@@ -1,0 +1,1 @@
+# part2/hbnb/app/persistence/__init__.py
