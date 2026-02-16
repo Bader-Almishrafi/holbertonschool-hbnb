@@ -24,6 +24,14 @@ This part includes the following deliverables:
 - **Business Logic Class Diagram**
   - Describes the core entities (User, Place, Review, Amenity) and their relationships
 
+## Business Logic (Models)
+Core entities implemented in `hbnb/app/models/`:
+- User (UUID, name/email validation, email uniqueness, owns many Places)
+- Place (UUID, title/price/coordinates validation, owner relationship, holds Reviews and Amenities)
+- Review (UUID, text/rating validation, links User and Place)
+- Amenity (UUID, name validation)
+
+
 - **Sequence Diagrams**
   - User Registration
   - Place Creation
