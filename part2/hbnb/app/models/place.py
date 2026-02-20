@@ -1,6 +1,5 @@
 # part2/hbnb/app/models/place.py
-from app.models.base_model import BaseModel
-
+from hbnb.app.models.base_model import BaseModel
 
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):

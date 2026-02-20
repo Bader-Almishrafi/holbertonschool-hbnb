@@ -1,6 +1,6 @@
 # part2/hbnb/app/api/v1/amenities.py
 from flask_restx import Namespace, Resource, fields
-from app.services import facade
+from hbnb.app.services import facade
 
 api = Namespace('amenities', description='Amenity operations')
 

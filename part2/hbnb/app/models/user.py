@@ -1,6 +1,6 @@
 # part2/hbnb/app/models/user.py
 import re
-from app.models.base_model import BaseModel
+from hbnb.app.models.base_model import BaseModel
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
