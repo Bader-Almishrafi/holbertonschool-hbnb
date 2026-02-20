@@ -1,5 +1,5 @@
-# part2/hbnb/app/models/place.py
 from hbnb.app.models.base_model import BaseModel
+
 
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
@@ -32,8 +32,8 @@ class Place(BaseModel):
 
         if not isinstance(self.price, (int, float)):
             raise ValueError("price must be a number")
-        if float(self.price) <= 0:
-            raise ValueError("price must be a positive value")
+        if float(self.price) < 0:  # ✅ non-negative
+            raise ValueError("price must be a non-negative value")
 
         if not isinstance(self.latitude, (int, float)):
             raise ValueError("latitude must be a number")
@@ -45,15 +45,15 @@ class Place(BaseModel):
         if not (-180.0 <= float(self.longitude) <= 180.0):
             raise ValueError("longitude must be between -180.0 and 180.0")
 
-        # owner must exist (in this stage: validate it's a User instance with id)
-        from app.models.user import User
+        # owner must exist (validate it's a User instance with id)
+        from hbnb.app.models.user import User  # ✅ FIXED import
         if not isinstance(self.owner, User):
             raise ValueError("owner must be a User instance")
         if not getattr(self.owner, "id", None):
             raise ValueError("owner must have a valid id")
 
     def add_review(self, review):
-        from app.models.review import Review
+        from hbnb.app.models.review import Review  # ✅ FIXED import
 
         if not isinstance(review, Review):
             raise ValueError("review must be a Review instance")
@@ -64,7 +64,7 @@ class Place(BaseModel):
             self.save()
 
     def add_amenity(self, amenity):
-        from app.models.amenity import Amenity
+        from hbnb.app.models.amenity import Amenity  # ✅ FIXED import
 
         if not isinstance(amenity, Amenity):
             raise ValueError("amenity must be an Amenity instance")
@@ -73,7 +73,7 @@ class Place(BaseModel):
             self.save()
 
     def remove_amenity(self, amenity):
-        from app.models.amenity import Amenity
+        from hbnb.app.models.amenity import Amenity  # ✅ FIXED import
 
         if not isinstance(amenity, Amenity):
             raise ValueError("amenity must be an Amenity instance")

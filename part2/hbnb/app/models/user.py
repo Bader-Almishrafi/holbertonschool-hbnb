@@ -6,7 +6,7 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class User(BaseModel):
-    _used_emails = set()  # in-memory uniqueness tracker
+    _used_emails = set()  # in-memory uniqueness tracker (note: persists while app is running)
 
     def __init__(self, first_name, last_name, email, is_admin=False):
         super().__init__()
@@ -20,6 +20,11 @@ class User(BaseModel):
 
         # Relationship (one-to-many): user -> places
         self.places = []
+
+    @classmethod
+    def _reset_used_emails(cls):
+        """Helper for tests (optional)."""
+        cls._used_emails = set()
 
     def _register_email(self, email):
         normalized = email.strip().lower()
@@ -60,7 +65,7 @@ class User(BaseModel):
 
     def add_place(self, place):
         # Lazy import to avoid circular imports
-        from app.models.place import Place
+        from hbnb.app.models.place import Place  # ✅ FIXED
 
         if not isinstance(place, Place):
             raise ValueError("place must be a Place instance")
