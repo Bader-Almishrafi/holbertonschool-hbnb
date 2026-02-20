@@ -1,49 +1,222 @@
-# HBnB Evolution – Part 1
+# HBnB Evolution – Part 1 & Part 2
 
 ## Overview
-This repository contains **Part 1** of the HBnB Evolution project.
-The focus of this part is on **system design and technical documentation**, providing a clear architectural blueprint before implementation.
+
+This repository contains the HBnB Evolution project.
+
+The project is divided into multiple parts:
+
+- Part 1 – System Design & Technical Documentation  
+- Part 2 – Core Implementation (Flask API + Business Logic + In-Memory Persistence)
+
+The goal of the project is to design and implement a simplified AirBnB-like platform using a clean layered architecture.
 
 ---
 
+# Part 1 – System Design & Documentation
+
 ## Objectives
-The main objectives of this phase are:
+
+The main objectives of this phase were:
+
 - Define the overall system architecture
 - Apply a three-layer design (Presentation, Business Logic, Persistence)
 - Use UML diagrams to document structure and interactions
-- Establish a solid foundation for the implementation phases
+- Establish a solid foundation for implementation
 
 ---
 
-## Contents
-This part includes the following deliverables:
+## Architecture
 
-- **High-Level Package Diagram**
-  - Illustrates the three-layer architecture and the use of the Facade pattern
+The system follows a three-layer architecture:
 
-- **Business Logic Class Diagram**
-  - Describes the core entities (User, Place, Review, Amenity) and their relationships
+1. **Presentation Layer**  
+   Handles HTTP requests (API endpoints) and user interaction.
 
-## Business Logic (Models)
-Core entities implemented in `hbnb/app/models/`:
-- User (UUID, name/email validation, email uniqueness, owns many Places)
-- Place (UUID, title/price/coordinates validation, owner relationship, holds Reviews and Amenities)
-- Review (UUID, text/rating validation, links User and Place)
-- Amenity (UUID, name validation)
+2. **Business Logic Layer**  
+   Contains domain models (User, Place, Review, Amenity) and enforces validation and relationships.
 
+3. **Persistence Layer**  
+   Responsible for data storage abstraction.
 
-- **Sequence Diagrams**
+---
+
+## Deliverables (Part 1)
+
+- High-Level Package Diagram
+- Business Logic Class Diagram
+- Sequence Diagrams:
   - User Registration
   - Place Creation
   - Review Submission
   - Fetching a List of Places
+- Consolidated Technical Documentation
 
-- **Technical Documentation**
-  - A consolidated document compiling all diagrams and explanatory notes
+Technical Document:  
+[TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)
 
 ---
 
-## Documentation
-The complete technical documentation for this part is available here:
+# Part 2 – Implementation (Flask API)
 
-📄 **[TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)**
+## Overview
+
+Part 2 implements the architectural blueprint defined in Part 1.
+
+The system is now a working REST API built using:
+
+- Flask
+- Flask-RESTx
+- Facade Design Pattern
+- InMemoryRepository (temporary persistence)
+- Pytest for automated testing
+
+---
+
+## Project Structure (Part 2)
+
+```
+part2/
+└── hbnb/
+    └── app/
+        ├── api/              # Presentation Layer (Flask-RESTx endpoints)
+        │   └── v1/
+        ├── models/           # Business Logic Layer (domain models)
+        ├── services/         # Facade layer
+        ├── persistence/      # InMemory repository
+        └── __init__.py
+```
+
+---
+
+## Implemented Models
+
+Located in `hbnb/app/models/`:
+
+### User
+- UUID  
+- Name and email validation  
+- Email uniqueness (in-memory)  
+- One-to-many relationship with Places  
+
+### Place
+- UUID  
+- Title validation (max 100 characters)  
+- Price validation (non-negative)  
+- Latitude range validation (-90 to 90)  
+- Longitude range validation (-180 to 180)  
+- Owner relationship  
+- Holds Reviews and Amenities  
+
+### Review
+- UUID  
+- Text validation  
+- Rating validation (integer, 1–5)  
+- Linked to User and Place  
+- Supports deletion  
+
+### Amenity
+- UUID  
+- Name validation (max 50 characters)  
+
+---
+
+## Implemented Endpoints (v1)
+
+### Users
+- `POST /api/v1/users/`
+- `GET /api/v1/users/`
+- `GET /api/v1/users/<id>`
+- `PUT /api/v1/users/<id>`
+
+### Amenities
+- `POST /api/v1/amenities/`
+- `GET /api/v1/amenities/`
+- `GET /api/v1/amenities/<id>`
+- `PUT /api/v1/amenities/<id>`
+
+### Places
+- `POST /api/v1/places/`
+- `GET /api/v1/places/`
+- `GET /api/v1/places/<id>`
+- `PUT /api/v1/places/<id>`
+- `GET /api/v1/places/<place_id>/reviews`
+
+### Reviews
+- `POST /api/v1/reviews/`
+- `GET /api/v1/reviews/`
+- `GET /api/v1/reviews/<id>`
+- `PUT /api/v1/reviews/<id>`
+- `DELETE /api/v1/reviews/<id>`
+
+---
+
+## Installation (Part 2)
+
+From the `part2` directory:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Run the Application
+
+```bash
+python run.py
+```
+
+The API will be available at:
+
+```
+http://127.0.0.1:5000/api/v1/
+```
+
+Swagger documentation is automatically generated by Flask-RESTx.
+
+---
+
+## Testing
+
+### Manual Testing
+Black-box testing was performed using:
+- curl
+- Swagger UI
+
+### Automated Testing
+The Pytest test suite is located in:
+
+```
+part2/tests/
+```
+
+Run tests with:
+
+```bash
+pytest -q
+```
+
+All endpoints were validated for:
+- Required fields
+- Boundary values
+- Error handling
+- Correct status codes
+- Relationship integrity
+
+Detailed testing report:
+
+```
+part2/TESTING_REPORT.md
+```
+
+---
+
+## Next Phase
+
+In Part 3, the in-memory persistence layer will be replaced with a full database implementation using SQLAlchemy, including:
+
+- ORM models
+- Foreign key relationships
+- Proper relational mapping
+- Database-backed persistence
