@@ -83,4 +83,4 @@ class UserResource(Resource):
         except ValueError as e:
             return {'error': str(e)}, 400
 
-        return user_to_response(updated), 200
+        return {"message": "User updated successfully", "user": user_to_response(updated)}, 200

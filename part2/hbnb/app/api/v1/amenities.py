@@ -64,4 +64,7 @@ class AmenityResource(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
 
-        return {"message": "Amenity updated successfully"}, 200
+        # return {"message": "Amenity updated successfully"}, 200
+        return {"message": "Amenity updated successfully",
+                 "amenity": amenity_to_response(updated)}, 200
+    

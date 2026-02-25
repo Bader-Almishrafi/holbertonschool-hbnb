@@ -144,11 +144,12 @@ class PlaceResource(Resource):
             return {"error": "Place not found"}, 404
 
         try:
-            facade.update_place(place_id, api.payload)
+            updated_place = facade.update_place(place_id, api.payload)
         except ValueError as e:
             return {"error": str(e)}, 400
 
-        return {"message": "Place updated successfully"}, 200
+        return {"message": "Place updated successfully", "place": place_full(updated_place)}, 200
+		
 
 
 @api.route('/<place_id>/reviews')
