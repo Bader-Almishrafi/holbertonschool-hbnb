@@ -9,9 +9,9 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 class User(BaseModel):
     __tablename__ = 'users'
 
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False, unique=True, index=True)
     password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
@@ -42,8 +42,8 @@ class User(BaseModel):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("first_name is required")
         value = value.strip()
-        if len(value) > 50:
-            raise ValueError("first_name max length is 50")
+        if len(value) > 255:
+            raise ValueError("first_name max length is 255")
         return value
 
     @validates("last_name")
@@ -51,8 +51,8 @@ class User(BaseModel):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("last_name is required")
         value = value.strip()
-        if len(value) > 50:
-            raise ValueError("last_name max length is 50")
+        if len(value) > 255:
+            raise ValueError("last_name max length is 255")
         return value
 
     @validates("email")
@@ -62,6 +62,8 @@ class User(BaseModel):
         value = value.strip().lower()
         if not _EMAIL_RE.match(value):
             raise ValueError("invalid email format")
+        if len(value) > 255:
+            raise ValueError("email max length is 255")
         return value
 
     @validates("is_admin")
@@ -71,14 +73,11 @@ class User(BaseModel):
         return value
 
     def hash_password(self, raw_password):
-        """Hashes the password before storing it."""
         if not isinstance(raw_password, str) or not raw_password.strip():
             raise ValueError("password is required")
-
         self.password = bcrypt.generate_password_hash(raw_password).decode("utf-8")
 
     def verify_password(self, raw_password):
-        """Verifies if the provided password matches the hashed password."""
         if not isinstance(raw_password, str) or not raw_password:
             return False
         return bcrypt.check_password_hash(self.password, raw_password)

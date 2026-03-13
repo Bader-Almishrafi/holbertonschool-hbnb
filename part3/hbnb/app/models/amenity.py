@@ -6,7 +6,7 @@ from hbnb.app.models.base_model import BaseModel
 class Amenity(BaseModel):
     __tablename__ = 'amenities'
 
-    name = db.Column(db.String(100), nullable=False, unique=True)
+    name = db.Column(db.String(255), nullable=False, unique=True)
 
     def __init__(self, name):
         self.name = name
@@ -17,8 +17,8 @@ class Amenity(BaseModel):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("name is required")
         value = value.strip()
-        if len(value) > 100:
-            raise ValueError("name max length is 100")
+        if len(value) > 255:
+            raise ValueError("name max length is 255")
         return value
 
     def validate(self):

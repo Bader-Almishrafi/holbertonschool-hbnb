@@ -12,9 +12,9 @@ place_amenity = db.Table(
 class Place(BaseModel):
     __tablename__ = 'places'
 
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=True, default="")
-    price = db.Column(db.Float, nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
@@ -33,7 +33,7 @@ class Place(BaseModel):
         backref=db.backref('places', lazy=True)
     )
 
-    def __init__(self, title, description="", price=0, latitude=0.0, longitude=0.0, owner_id=None):
+    def __init__(self, title, description=None, price=0, latitude=0.0, longitude=0.0, owner_id=None):
         self.title = title
         self.description = description
         self.price = price
@@ -47,14 +47,14 @@ class Place(BaseModel):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("title is required")
         value = value.strip()
-        if len(value) > 100:
-            raise ValueError("title max length is 100")
+        if len(value) > 255:
+            raise ValueError("title max length is 255")
         return value
 
     @validates("description")
     def validate_description(self, key, value):
         if value is None:
-            return ""
+            return None
         if not isinstance(value, str):
             raise ValueError("description must be a string")
         return value
@@ -65,7 +65,7 @@ class Place(BaseModel):
             raise ValueError("price must be a number")
         if value < 0:
             raise ValueError("price must be positive")
-        return float(value)
+        return value
 
     @validates("latitude")
     def validate_latitude(self, key, value):

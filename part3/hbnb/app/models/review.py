@@ -5,6 +5,9 @@ from hbnb.app.models.base_model import BaseModel
 
 class Review(BaseModel):
     __tablename__ = 'reviews'
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'place_id', name='uq_review_user_place'),
+    )
 
     text = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)

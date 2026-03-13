@@ -1,7 +1,6 @@
-# part3/hbnb/app/models/base_model.py
-
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from hbnb.app import db
 
 
@@ -18,15 +17,12 @@ class BaseModel(db.Model):
     )
 
     def save(self):
-        """Update updated_at whenever the object is modified."""
         self.updated_at = datetime.utcnow()
 
     def update(self, data):
-        """Update object attributes from dict and refresh updated_at."""
         for key, value in (data or {}).items():
             if key in ("id", "created_at", "updated_at"):
                 continue
-
             if hasattr(self, key):
                 setattr(self, key, value)
 
@@ -36,7 +32,6 @@ class BaseModel(db.Model):
             self.validate()
 
     def to_dict(self):
-        """Convert SQLAlchemy object to dictionary."""
         result = {}
 
         for column in self.__table__.columns:
@@ -44,6 +39,8 @@ class BaseModel(db.Model):
 
             if isinstance(value, datetime):
                 result[column.name] = value.isoformat()
+            elif isinstance(value, Decimal):
+                result[column.name] = float(value)
             else:
                 result[column.name] = value
 

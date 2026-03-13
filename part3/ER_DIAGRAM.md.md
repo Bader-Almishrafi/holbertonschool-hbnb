@@ -1,6 +1,6 @@
 # HBnB ER Diagram
 
-The following diagram represents the database schema for the HBnB project.  
+The following diagram represents the database schema for the HBnB project.
 It shows the main entities and the relationships between them.
 
 ```mermaid
@@ -10,7 +10,7 @@ erDiagram
         string id PK
         string first_name
         string last_name
-        string email
+        string email UNIQUE
         string password
         boolean is_admin
         datetime created_at
@@ -21,7 +21,7 @@ erDiagram
         string id PK
         string title
         string description
-        float price
+        decimal price
         float latitude
         float longitude
         string owner_id FK
@@ -41,14 +41,14 @@ erDiagram
 
     AMENITIES {
         string id PK
-        string name
+        string name UNIQUE
         datetime created_at
         datetime updated_at
     }
 
     PLACE_AMENITY {
-        string place_id PK
-        string amenity_id PK
+        string place_id PK, FK
+        string amenity_id PK, FK
     }
 
     USERS ||--o{ PLACES : owns

@@ -1,6 +1,3 @@
--- HBnB database schema
--- Task 9: SQL Scripts for Table Generation and Initial Data
-
 PRAGMA foreign_keys = ON;
 
 DROP TABLE IF EXISTS place_amenity;
@@ -15,7 +12,9 @@ CREATE TABLE users (
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    is_admin BOOLEAN NOT NULL DEFAULT FALSE
+    is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
 );
 
 CREATE TABLE places (
@@ -26,6 +25,8 @@ CREATE TABLE places (
     latitude FLOAT NOT NULL CHECK (latitude >= -90 AND latitude <= 90),
     longitude FLOAT NOT NULL CHECK (longitude >= -180 AND longitude <= 180),
     owner_id CHAR(36) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -35,6 +36,8 @@ CREATE TABLE reviews (
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     user_id CHAR(36) NOT NULL,
     place_id CHAR(36) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE CASCADE,
     UNIQUE(user_id, place_id)
@@ -42,7 +45,9 @@ CREATE TABLE reviews (
 
 CREATE TABLE amenities (
     id CHAR(36) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
 );
 
 CREATE TABLE place_amenity (
