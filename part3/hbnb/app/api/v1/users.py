@@ -1,4 +1,3 @@
-# part2/hbnb/app/api/v1/users.py
 from flask_restx import Namespace, Resource, fields
 from hbnb.app.services import facade
 
@@ -19,7 +18,6 @@ user_update_model = api.model('UserUpdate', {
 
 
 def user_to_response(user):
-    """Return user dict without sensitive fields (password not included)."""
     return {
         'id': user.id,
         'first_name': user.first_name,
@@ -45,10 +43,12 @@ class UserList(Resource):
         try:
             new_user = facade.create_user(user_data)
         except ValueError as e:
-            # validation errors from model
             return {'error': str(e)}, 400
 
-        return user_to_response(new_user), 201
+        return {
+            'id': new_user.id,
+            'message': 'User created successfully'
+        }, 201
 
     @api.response(200, 'Users retrieved successfully')
     def get(self):
@@ -90,4 +90,7 @@ class UserResource(Resource):
         except ValueError as e:
             return {'error': str(e)}, 400
 
-        return {"message": "User updated successfully", "user": user_to_response(updated)}, 200
+        return {
+            "message": "User updated successfully",
+            "user": user_to_response(updated)
+        }, 200
