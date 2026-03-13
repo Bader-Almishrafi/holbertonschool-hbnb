@@ -1,4 +1,4 @@
-from hbnb.app.persistence.repository import InMemoryRepository
+from hbnb.app.persistence.repository import InMemoryRepository, SQLAlchemyRepository
 from hbnb.app.models.user import User
 from hbnb.app.models.amenity import Amenity
 from hbnb.app.models.place import Place
@@ -7,7 +7,7 @@ from hbnb.app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = InMemoryRepository()
+        self.user_repo = SQLAlchemyRepository(User)
         self.amenity_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
@@ -25,11 +25,7 @@ class HBnBFacade:
         return self.user_repo.get_all()
 
     def update_user(self, user_id, user_data):
-        user = self.get_user(user_id)
-        if not user:
-            return None
-        user.update(user_data)
-        return user
+        return self.user_repo.update(user_id, user_data)
 
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)

@@ -1,10 +1,19 @@
 import re
+from hbnb.app import db
 from hbnb.app.models.base_model import BaseModel
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-class User(BaseModel):
+class User(BaseModel, db.Model):
+    __tablename__ = 'users'
+
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    _password = db.Column('password', db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+
     _used_emails = set()
 
     def __init__(self, first_name, last_name, email, password, is_admin=False):
@@ -17,7 +26,6 @@ class User(BaseModel):
         self.is_admin = bool(is_admin)
 
         self.validate()
-        self._register_email(self.email)
 
         self.places = []
 
@@ -83,18 +91,23 @@ class User(BaseModel):
             raise ValueError("is_admin must be boolean")
 
     def update(self, data):
+        data = dict(data or {})
         old_email = self.email
 
-        if "password" in (data or {}):
-            self.hash_password(data["password"])
-            data = dict(data)
-            data.pop("password")
+        if "password" in data:
+            self.hash_password(data.pop("password"))
+
+        if "email" in data:
+            new_email = data["email"]
+            if not isinstance(new_email, str) or not new_email.strip():
+                raise ValueError("email is required")
+            if not _EMAIL_RE.match(new_email.strip()):
+                raise ValueError("invalid email format")
 
         super().update(data)
 
-        if "email" in (data or {}) and self.email != old_email:
-            self._unregister_email(old_email)
-            self._register_email(self.email)
+        if "email" in data and self.email.strip().lower() != old_email.strip().lower():
+            pass
 
     def to_dict(self):
         user_dict = super().to_dict()
