@@ -1,92 +1,153 @@
-# HBnB - Part 2
+# HBnB - Part 3
 
-This directory contains the implementation of the HBnB application (Part 2).
+This part of the HBnB project focuses on improving the backend by adding authentication, role-based access control, database persistence using SQLAlchemy, and defining relationships between entities.
 
-It follows a modular layered architecture:
-
-- **Presentation Layer**: `hbnb/app/api/` (Flask-RESTx endpoints, versioned under `v1/`)
-- **Business Logic Layer**: `hbnb/app/models/` (domain models with validation and relationships)
-- **Service Layer (Facade)**: `hbnb/app/services/` (Facade pattern to connect layers)
-- **Persistence Layer**: `hbnb/app/persistence/` (in-memory repository for Part 2; SQLAlchemy in Part 3)
+The goal of this part is to move from an in-memory storage system to a real database while maintaining a clean architecture using the repository and service patterns.
 
 ---
 
-## Installation
+# Features Implemented
 
-From inside the `part2` directory:
+### Authentication with JWT
 
-Create a virtual environment:
+JWT authentication was implemented to secure endpoints.  
+Only authenticated users can create and modify resources.
 
-```bash
-python -m venv venv
-```
+Protected endpoints include:
 
-Activate the virtual environment:
+- Creating places
+- Updating places
+- Creating reviews
+- Updating reviews
+- Deleting reviews
+- Updating user information
 
-Windows:
-```bash
-venv\Scripts\activate
-```
-
-Mac/Linux:
-```bash
-source venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
+Public endpoints remain accessible without authentication.
 
 ---
 
-## Run the Application
+### Administrator Access Control
 
-From inside the `part2` directory:
+Role-based access control (RBAC) was added to allow administrators to perform privileged actions.
 
-```bash
-python run.py
-```
+Administrators can:
 
-The server will start at:
+- Create new users
+- Modify any user information
+- Add new amenities
+- Modify amenities
+- Bypass ownership restrictions for places and reviews
 
-```
-http://127.0.0.1:5000
-```
-
-Swagger API documentation is available at:
-
-```
-http://127.0.0.1:5000/api/v1/
-```
+Admin privileges are checked using JWT claims.
 
 ---
 
-## Run Tests
+### SQLAlchemy Persistence Layer
 
-Make sure you are inside the `part2` directory.
+The in-memory repository was replaced with a SQLAlchemy-based repository to persist data in a relational database.
 
-Set PYTHONPATH (Windows PowerShell):
+Key components include:
 
-```bash
-$env:PYTHONPATH="."
-```
+- `SQLAlchemyRepository` for generic CRUD operations
+- `UserRepository` for user-specific queries
+- Integration with the application facade
 
-Then run:
-
-```bash
-pytest -q
-```
+SQLite is used as the development database.
 
 ---
 
-## Implemented Features
+### Database Models
 
-- CRUD endpoints for Users
-- CRUD endpoints for Amenities
-- CRUD endpoints for Places
-- CRUD endpoints for Reviews (DELETE supported for Review only)
-- Model-level validation
-- Relationship handling between User, Place, Review, and Amenity
-- In-memory repository (Part 2 persistence)
+The following entities were mapped using SQLAlchemy:
+
+- **User**
+- **Place**
+- **Review**
+- **Amenity**
+
+Each model includes validation logic and integrates with the BaseModel class that provides:
+
+- UUID identifiers
+- created_at timestamp
+- updated_at timestamp
+
+---
+
+### Relationships Between Entities
+
+The following relationships were implemented:
+
+**User → Place (One-to-Many)**  
+A user can own multiple places.
+
+**User → Review (One-to-Many)**  
+A user can write multiple reviews.
+
+**Place → Review (One-to-Many)**  
+A place can have multiple reviews.
+
+**Place ↔ Amenity (Many-to-Many)**  
+A place can have multiple amenities and an amenity can belong to multiple places.
+
+This relationship is implemented using the `place_amenity` association table.
+
+---
+
+### SQL Database Schema
+
+Raw SQL scripts were created to generate the database schema without using the ORM.
+
+Tables included:
+
+- users
+- places
+- reviews
+- amenities
+- place_amenity
+
+Constraints include:
+
+- Foreign keys
+- Unique constraints
+- Composite primary keys
+- Rating validation (1–5)
+
+Initial data includes:
+
+- Administrator user
+- Default amenities
+
+---
+
+### ER Diagram
+
+An Entity-Relationship diagram was generated using Mermaid.js to visualize the database structure.
+
+Entities represented:
+
+- USERS
+- PLACES
+- REVIEWS
+- AMENITIES
+- PLACE_AMENITY
+
+The diagram reflects the relationships implemented in the SQLAlchemy models.
+
+---
+
+# Technologies Used
+
+- Python
+- Flask
+- Flask-RESTx
+- Flask-JWT-Extended
+- Flask-Bcrypt
+- SQLAlchemy
+- SQLite
+- Mermaid.js
+
+---
+
+# Authors
+
+HBnB Project - Holberton School
