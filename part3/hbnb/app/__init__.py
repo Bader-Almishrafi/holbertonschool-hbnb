@@ -4,18 +4,12 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 
-from hbnb.app.api.v1.users import api as users_ns
-from hbnb.app.api.v1.amenities import api as amenities_ns
-from hbnb.app.api.v1.places import api as places_ns
-from hbnb.app.api.v1.reviews import api as reviews_ns
-from hbnb.app.api.v1.auth import api as auth_ns
-
 bcrypt = Bcrypt()
 jwt = JWTManager()
 db = SQLAlchemy()
 
 
-def create_app(config_class="config.DevelopmentConfig"):
+def create_app(config_class="hbnb.config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -24,6 +18,12 @@ def create_app(config_class="config.DevelopmentConfig"):
     bcrypt.init_app(app)
     jwt.init_app(app)
     db.init_app(app)
+
+    from hbnb.app.api.v1.users import api as users_ns
+    from hbnb.app.api.v1.amenities import api as amenities_ns
+    from hbnb.app.api.v1.places import api as places_ns
+    from hbnb.app.api.v1.reviews import api as reviews_ns
+    from hbnb.app.api.v1.auth import api as auth_ns
 
     api = Api(
         app,

@@ -5,15 +5,11 @@ from datetime import datetime
 from hbnb.app import db
 
 
-class BaseModel:
-    id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
+class BaseModel(db.Model):
+    __abstract__ = True
 
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        nullable=False
-    )
-
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(
         db.DateTime,
         default=datetime.utcnow,
@@ -36,7 +32,6 @@ class BaseModel:
 
         self.save()
 
-        # validate after updates if validate() exists
         if hasattr(self, "validate") and callable(getattr(self, "validate")):
             self.validate()
 
