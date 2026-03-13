@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from hbnb.app.services import facade
 
 api = Namespace('users', description='User operations')
@@ -11,9 +12,8 @@ user_create_model = api.model('UserCreate', {
 })
 
 user_update_model = api.model('UserUpdate', {
-    'first_name': fields.String(required=True, description='First name of the user'),
-    'last_name': fields.String(required=True, description='Last name of the user'),
-    'email': fields.String(required=True, description='Email of the user')
+    'first_name': fields.String(required=False, description='First name of the user'),
+    'last_name': fields.String(required=False, description='Last name of the user')
 })
 
 
@@ -68,22 +68,27 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
         return user_to_response(user), 200
 
+    @jwt_required()
     @api.expect(user_update_model, validate=True)
     @api.response(200, 'User successfully updated')
     @api.response(404, 'User not found')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Unauthorized action')
     def put(self, user_id):
-        """Update user details by ID"""
+        """Update authenticated user's own profile (excluding email/password)"""
+        current_user_id = get_jwt_identity()
+
+        if current_user_id != user_id:
+            return {'error': 'Unauthorized action'}, 403
+
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
 
-        data = api.payload
+        data = api.payload or {}
 
-        if data.get('email') and data['email'].strip().lower() != user.email.strip().lower():
-            existing_user = facade.get_user_by_email(data['email'])
-            if existing_user:
-                return {'error': 'Email already registered'}, 400
+        if 'email' in data or 'password' in data:
+            return {'error': 'You cannot modify email or password'}, 400
 
         try:
             updated = facade.update_user(user_id, data)

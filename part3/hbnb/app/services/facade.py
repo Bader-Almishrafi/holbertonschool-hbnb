@@ -80,8 +80,8 @@ class HBnBFacade:
             owner=owner
         )
 
-        for a in amenities:
-            place.add_amenity(a)
+        for amenity in amenities:
+            place.add_amenity(amenity)
 
         self.place_repo.add(place)
         return place
@@ -116,9 +116,10 @@ class HBnBFacade:
                 place.add_amenity(amenity)
 
         scalar_updates = {}
-        for k in ("title", "description", "price", "latitude", "longitude"):
-            if k in place_data:
-                scalar_updates[k] = place_data[k]
+        for key in ("title", "description", "price", "latitude", "longitude"):
+            if key in place_data:
+                scalar_updates[key] = place_data[key]
+
         if scalar_updates:
             place.update(scalar_updates)
 
@@ -165,9 +166,9 @@ class HBnBFacade:
             return None
 
         allowed = {}
-        for k in ("text", "rating"):
-            if k in review_data:
-                allowed[k] = review_data[k]
+        for key in ("text", "rating"):
+            if key in review_data:
+                allowed[key] = review_data[key]
 
         review.update(allowed)
         return review

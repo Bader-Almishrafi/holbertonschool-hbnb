@@ -1,82 +1,112 @@
-from hbnb.app.models.base_model import BaseModel
+from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from hbnb.app.services import facade
+
+api = Namespace('places', description='Place operations')
+
+place_create_model = api.model('PlaceCreate', {
+    'title': fields.String(required=True, description='Title of the place'),
+    'description': fields.String(required=False, description='Description of the place'),
+    'price': fields.Float(required=True, description='Price per night'),
+    'latitude': fields.Float(required=True, description='Latitude of the place'),
+    'longitude': fields.Float(required=True, description='Longitude of the place'),
+    'amenities': fields.List(fields.String, required=False, description='List of amenity IDs')
+})
+
+place_update_model = api.model('PlaceUpdate', {
+    'title': fields.String(required=False, description='Title of the place'),
+    'description': fields.String(required=False, description='Description of the place'),
+    'price': fields.Float(required=False, description='Price per night'),
+    'latitude': fields.Float(required=False, description='Latitude of the place'),
+    'longitude': fields.Float(required=False, description='Longitude of the place'),
+    'amenities': fields.List(fields.String, required=False, description='List of amenity IDs')
+})
 
 
-class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
-        super().__init__()
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner = owner  # User instance
+def place_to_response(place):
+    return {
+        'id': place.id,
+        'title': place.title,
+        'description': place.description,
+        'price': place.price,
+        'latitude': place.latitude,
+        'longitude': place.longitude,
+        'owner_id': place.owner.id if getattr(place, 'owner', None) else None,
+        'amenities': [amenity.id for amenity in getattr(place, 'amenities', [])]
+    }
 
-        # Relationships
-        self.reviews = []
-        self.amenities = []
 
-        self.validate()
+@api.route('/')
+class PlaceList(Resource):
+    @api.response(200, 'Places retrieved successfully')
+    def get(self):
+        """Retrieve all places (public)"""
+        places = facade.get_all_places()
+        return [place_to_response(place) for place in places], 200
 
-        # Add this place to owner's places list
-        if hasattr(self.owner, "add_place"):
-            self.owner.add_place(self)
+    @jwt_required()
+    @api.expect(place_create_model, validate=True)
+    @api.response(201, 'Place successfully created')
+    @api.response(400, 'Invalid input data')
+    def post(self):
+        """Create a new place for the authenticated user"""
+        current_user_id = get_jwt_identity()
+        data = api.payload or {}
 
-    def validate(self):
-        if not isinstance(self.title, str) or not self.title.strip():
-            raise ValueError("title is required")
-        if len(self.title.strip()) > 100:
-            raise ValueError("title max length is 100")
+        place_data = {
+            'title': data.get('title'),
+            'description': data.get('description', ''),
+            'price': data.get('price'),
+            'latitude': data.get('latitude'),
+            'longitude': data.get('longitude'),
+            'owner_id': current_user_id,
+            'amenities': data.get('amenities', [])
+        }
 
-        if self.description is not None and not isinstance(self.description, str):
-            raise ValueError("description must be a string")
+        try:
+            new_place = facade.create_place(place_data)
+        except ValueError as e:
+            return {'error': str(e)}, 400
 
-        if not isinstance(self.price, (int, float)):
-            raise ValueError("price must be a number")
-        if float(self.price) < 0:  # ✅ non-negative
-            raise ValueError("price must be a non-negative value")
+        return place_to_response(new_place), 201
 
-        if not isinstance(self.latitude, (int, float)):
-            raise ValueError("latitude must be a number")
-        if not (-90.0 <= float(self.latitude) <= 90.0):
-            raise ValueError("latitude must be between -90.0 and 90.0")
 
-        if not isinstance(self.longitude, (int, float)):
-            raise ValueError("longitude must be a number")
-        if not (-180.0 <= float(self.longitude) <= 180.0):
-            raise ValueError("longitude must be between -180.0 and 180.0")
+@api.route('/<place_id>')
+class PlaceResource(Resource):
+    @api.response(200, 'Place details retrieved successfully')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """Get place details by ID (public)"""
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+        return place_to_response(place), 200
 
-        # owner must exist (validate it's a User instance with id)
-        from hbnb.app.models.user import User  # ✅ FIXED import
-        if not isinstance(self.owner, User):
-            raise ValueError("owner must be a User instance")
-        if not getattr(self.owner, "id", None):
-            raise ValueError("owner must have a valid id")
+    @jwt_required()
+    @api.expect(place_update_model, validate=True)
+    @api.response(200, 'Place successfully updated')
+    @api.response(404, 'Place not found')
+    @api.response(403, 'Unauthorized action')
+    @api.response(400, 'Invalid input data')
+    def put(self, place_id):
+        """Update a place only if the authenticated user is the owner"""
+        current_user_id = get_jwt_identity()
+        place = facade.get_place(place_id)
 
-    def add_review(self, review):
-        from hbnb.app.models.review import Review  # ✅ FIXED import
+        if not place:
+            return {'error': 'Place not found'}, 404
 
-        if not isinstance(review, Review):
-            raise ValueError("review must be a Review instance")
-        if review.place != self:
-            raise ValueError("review.place must be this place")
-        if review not in self.reviews:
-            self.reviews.append(review)
-            self.save()
+        if not getattr(place, 'owner', None) or str(place.owner.id) != str(current_user_id):
+            return {'error': 'Unauthorized action'}, 403
 
-    def add_amenity(self, amenity):
-        from hbnb.app.models.amenity import Amenity  # ✅ FIXED import
+        data = api.payload or {}
 
-        if not isinstance(amenity, Amenity):
-            raise ValueError("amenity must be an Amenity instance")
-        if amenity not in self.amenities:
-            self.amenities.append(amenity)
-            self.save()
+        if 'owner_id' in data:
+            data.pop('owner_id')
 
-    def remove_amenity(self, amenity):
-        from hbnb.app.models.amenity import Amenity  # ✅ FIXED import
+        try:
+            updated_place = facade.update_place(place_id, data)
+        except ValueError as e:
+            return {'error': str(e)}, 400
 
-        if not isinstance(amenity, Amenity):
-            raise ValueError("amenity must be an Amenity instance")
-        if amenity in self.amenities:
-            self.amenities.remove(amenity)
-            self.save()
+        return place_to_response(updated_place), 200
