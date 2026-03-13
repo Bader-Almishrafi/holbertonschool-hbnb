@@ -1,17 +1,18 @@
-from hbnb.app.persistence.repository import InMemoryRepository
-from hbnb.app.persistence.user_repository import UserRepository
 from hbnb.app.models.user import User
 from hbnb.app.models.amenity import Amenity
 from hbnb.app.models.place import Place
 from hbnb.app.models.review import Review
+from hbnb.app.persistence.repository import SQLAlchemyRepository
+from hbnb.app.persistence.user_repository import UserRepository
+from hbnb.app import db
 
 
 class HBnBFacade:
     def __init__(self):
         self.user_repo = UserRepository()
-        self.amenity_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
 
     # ---------- Users ----------
     def create_user(self, user_data):
@@ -44,11 +45,7 @@ class HBnBFacade:
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
-        amenity = self.get_amenity(amenity_id)
-        if not amenity:
-            return None
-        amenity.update(amenity_data)
-        return amenity
+        return self.amenity_repo.update(amenity_id, amenity_data)
 
     # ---------- Places ----------
     def create_place(self, place_data):
@@ -74,7 +71,7 @@ class HBnBFacade:
             price=place_data.get("price"),
             latitude=place_data.get("latitude"),
             longitude=place_data.get("longitude"),
-            owner=owner
+            owner_id=owner_id
         )
 
         for amenity in amenities:
@@ -94,32 +91,29 @@ class HBnBFacade:
         if not place:
             return None
 
-        if "owner_id" in place_data:
-            new_owner = self.get_user(place_data.get("owner_id"))
-            if not new_owner:
-                raise ValueError("owner not found")
-            place.owner = new_owner
+        data = dict(place_data or {})
 
-        if "amenities" in place_data:
-            amenity_ids = place_data.get("amenities")
+        if "owner_id" in data:
+            data.pop("owner_id")
+
+        if "amenities" in data:
+            amenity_ids = data.pop("amenities")
             if not isinstance(amenity_ids, list):
                 raise ValueError("amenities must be a list of amenity ids")
 
-            place.amenities = []
+            amenities = []
             for aid in amenity_ids:
                 amenity = self.get_amenity(aid)
                 if not amenity:
                     raise ValueError(f"amenity not found: {aid}")
-                place.add_amenity(amenity)
+                amenities.append(amenity)
 
-        scalar_updates = {}
-        for key in ("title", "description", "price", "latitude", "longitude"):
-            if key in place_data:
-                scalar_updates[key] = place_data[key]
+            place.amenities = amenities
 
-        if scalar_updates:
-            place.update(scalar_updates)
+        if data:
+            place.update(data)
 
+        db.session.commit()
         return place
 
     # ---------- Reviews ----------
@@ -138,8 +132,8 @@ class HBnBFacade:
         review = Review(
             text=review_data.get("text"),
             rating=review_data.get("rating"),
-            place=place,
-            user=user
+            user_id=user_id,
+            place_id=place_id
         )
 
         self.review_repo.add(review)
@@ -152,33 +146,13 @@ class HBnBFacade:
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        place = self.get_place(place_id)
-        if not place:
-            return None
-        return place.reviews
+        return Review.query.filter_by(place_id=place_id).all()
 
     def update_review(self, review_id, review_data):
-        review = self.get_review(review_id)
-        if not review:
-            return None
-
-        allowed = {}
-        for key in ("text", "rating"):
-            if key in review_data:
-                allowed[key] = review_data[key]
-
-        review.update(allowed)
-        return review
+        data = dict(review_data or {})
+        data.pop("user_id", None)
+        data.pop("place_id", None)
+        return self.review_repo.update(review_id, data)
 
     def delete_review(self, review_id):
-        review = self.get_review(review_id)
-        if not review:
-            return False
-
-        if review.place and hasattr(review.place, "reviews"):
-            if review in review.place.reviews:
-                review.place.reviews.remove(review)
-                review.place.save()
-
-        self.review_repo.delete(review_id)
-        return True
+        return self.review_repo.delete(review_id)

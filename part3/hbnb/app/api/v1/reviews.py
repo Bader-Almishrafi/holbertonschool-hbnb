@@ -21,8 +21,8 @@ def review_to_response(review):
         'id': review.id,
         'text': review.text,
         'rating': review.rating,
-        'user_id': review.user.id if getattr(review, 'user', None) else None,
-        'place_id': review.place.id if getattr(review, 'place', None) else None
+        'user_id': review.user_id,
+        'place_id': review.place_id
     }
 
 
@@ -38,6 +38,7 @@ class ReviewList(Resource):
     @api.expect(review_create_model, validate=True)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(404, 'Place not found')
     def post(self):
         """
         Create a review.
@@ -54,16 +55,12 @@ class ReviewList(Resource):
         if not place:
             return {'error': 'Place not found'}, 404
 
-        if not is_admin:
-            if getattr(place, 'owner', None) and str(place.owner.id) == str(current_user_id):
-                return {'error': 'You cannot review your own place.'}, 400
+        if not is_admin and str(place.owner_id) == str(current_user_id):
+            return {'error': 'You cannot review your own place.'}, 400
 
         existing_reviews = facade.get_reviews_by_place(place.id)
-        if existing_reviews is None:
-            existing_reviews = []
-
         for review in existing_reviews:
-            if getattr(review, 'user', None) and str(review.user.id) == str(current_user_id):
+            if str(review.user_id) == str(current_user_id):
                 return {'error': 'You have already reviewed this place.'}, 400
 
         review_data = {
@@ -108,15 +105,10 @@ class ReviewResource(Resource):
         if not review:
             return {'error': 'Review not found'}, 404
 
-        if not is_admin:
-            if not getattr(review, 'user', None) or str(review.user.id) != str(current_user_id):
-                return {'error': 'Unauthorized action'}, 403
+        if not is_admin and str(review.user_id) != str(current_user_id):
+            return {'error': 'Unauthorized action'}, 403
 
         data = api.payload or {}
-        if 'user_id' in data:
-            data.pop('user_id')
-        if 'place_id' in data:
-            data.pop('place_id')
 
         try:
             updated_review = facade.update_review(review_id, data)
@@ -139,9 +131,8 @@ class ReviewResource(Resource):
         if not review:
             return {'error': 'Review not found'}, 404
 
-        if not is_admin:
-            if not getattr(review, 'user', None) or str(review.user.id) != str(current_user_id):
-                return {'error': 'Unauthorized action'}, 403
+        if not is_admin and str(review.user_id) != str(current_user_id):
+            return {'error': 'Unauthorized action'}, 403
 
         deleted = facade.delete_review(review_id)
         if not deleted:

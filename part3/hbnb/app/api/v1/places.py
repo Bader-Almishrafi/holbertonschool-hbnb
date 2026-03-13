@@ -31,8 +31,8 @@ def place_to_response(place):
         'price': place.price,
         'latitude': place.latitude,
         'longitude': place.longitude,
-        'owner_id': place.owner.id if getattr(place, 'owner', None) else None,
-        'amenities': [amenity.id for amenity in getattr(place, 'amenities', [])]
+        'owner_id': place.owner_id,
+        'amenities': [amenity.id for amenity in place.amenities]
     }
 
 
@@ -98,13 +98,11 @@ class PlaceResource(Resource):
         if not place:
             return {'error': 'Place not found'}, 404
 
-        if not is_admin:
-            if not getattr(place, 'owner', None) or str(place.owner.id) != str(current_user_id):
-                return {'error': 'Unauthorized action'}, 403
+        if not is_admin and str(place.owner_id) != str(current_user_id):
+            return {'error': 'Unauthorized action'}, 403
 
         data = api.payload or {}
-        if 'owner_id' in data:
-            data.pop('owner_id')
+        data.pop('owner_id', None)
 
         try:
             updated_place = facade.update_place(place_id, data)

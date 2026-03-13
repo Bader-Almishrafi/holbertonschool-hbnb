@@ -1,112 +1,105 @@
-from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from hbnb.app.services import facade
+from sqlalchemy.orm import validates
+from hbnb.app import db
+from hbnb.app.models.base_model import BaseModel
 
-api = Namespace('places', description='Place operations')
-
-place_create_model = api.model('PlaceCreate', {
-    'title': fields.String(required=True, description='Title of the place'),
-    'description': fields.String(required=False, description='Description of the place'),
-    'price': fields.Float(required=True, description='Price per night'),
-    'latitude': fields.Float(required=True, description='Latitude of the place'),
-    'longitude': fields.Float(required=True, description='Longitude of the place'),
-    'amenities': fields.List(fields.String, required=False, description='List of amenity IDs')
-})
-
-place_update_model = api.model('PlaceUpdate', {
-    'title': fields.String(required=False, description='Title of the place'),
-    'description': fields.String(required=False, description='Description of the place'),
-    'price': fields.Float(required=False, description='Price per night'),
-    'latitude': fields.Float(required=False, description='Latitude of the place'),
-    'longitude': fields.Float(required=False, description='Longitude of the place'),
-    'amenities': fields.List(fields.String, required=False, description='List of amenity IDs')
-})
+place_amenity = db.Table(
+    'place_amenity',
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+)
 
 
-def place_to_response(place):
-    return {
-        'id': place.id,
-        'title': place.title,
-        'description': place.description,
-        'price': place.price,
-        'latitude': place.latitude,
-        'longitude': place.longitude,
-        'owner_id': place.owner.id if getattr(place, 'owner', None) else None,
-        'amenities': [amenity.id for amenity in getattr(place, 'amenities', [])]
-    }
+class Place(BaseModel):
+    __tablename__ = 'places'
 
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True, default="")
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
-@api.route('/')
-class PlaceList(Resource):
-    @api.response(200, 'Places retrieved successfully')
-    def get(self):
-        """Retrieve all places (public)"""
-        places = facade.get_all_places()
-        return [place_to_response(place) for place in places], 200
+    reviews = db.relationship(
+        'Review',
+        backref='place',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
 
-    @jwt_required()
-    @api.expect(place_create_model, validate=True)
-    @api.response(201, 'Place successfully created')
-    @api.response(400, 'Invalid input data')
-    def post(self):
-        """Create a new place for the authenticated user"""
-        current_user_id = get_jwt_identity()
-        data = api.payload or {}
+    amenities = db.relationship(
+        'Amenity',
+        secondary=place_amenity,
+        lazy='subquery',
+        backref=db.backref('places', lazy=True)
+    )
 
-        place_data = {
-            'title': data.get('title'),
-            'description': data.get('description', ''),
-            'price': data.get('price'),
-            'latitude': data.get('latitude'),
-            'longitude': data.get('longitude'),
-            'owner_id': current_user_id,
-            'amenities': data.get('amenities', [])
-        }
+    def __init__(self, title, description="", price=0, latitude=0.0, longitude=0.0, owner_id=None):
+        self.title = title
+        self.description = description
+        self.price = price
+        self.latitude = latitude
+        self.longitude = longitude
+        self.owner_id = owner_id
+        self.validate()
 
-        try:
-            new_place = facade.create_place(place_data)
-        except ValueError as e:
-            return {'error': str(e)}, 400
+    @validates("title")
+    def validate_title(self, key, value):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("title is required")
+        value = value.strip()
+        if len(value) > 100:
+            raise ValueError("title max length is 100")
+        return value
 
-        return place_to_response(new_place), 201
+    @validates("description")
+    def validate_description(self, key, value):
+        if value is None:
+            return ""
+        if not isinstance(value, str):
+            raise ValueError("description must be a string")
+        return value
 
+    @validates("price")
+    def validate_price(self, key, value):
+        if not isinstance(value, (int, float)):
+            raise ValueError("price must be a number")
+        if value < 0:
+            raise ValueError("price must be positive")
+        return float(value)
 
-@api.route('/<place_id>')
-class PlaceResource(Resource):
-    @api.response(200, 'Place details retrieved successfully')
-    @api.response(404, 'Place not found')
-    def get(self, place_id):
-        """Get place details by ID (public)"""
-        place = facade.get_place(place_id)
-        if not place:
-            return {'error': 'Place not found'}, 404
-        return place_to_response(place), 200
+    @validates("latitude")
+    def validate_latitude(self, key, value):
+        if not isinstance(value, (int, float)):
+            raise ValueError("latitude must be a number")
+        if value < -90 or value > 90:
+            raise ValueError("latitude must be between -90 and 90")
+        return float(value)
 
-    @jwt_required()
-    @api.expect(place_update_model, validate=True)
-    @api.response(200, 'Place successfully updated')
-    @api.response(404, 'Place not found')
-    @api.response(403, 'Unauthorized action')
-    @api.response(400, 'Invalid input data')
-    def put(self, place_id):
-        """Update a place only if the authenticated user is the owner"""
-        current_user_id = get_jwt_identity()
-        place = facade.get_place(place_id)
+    @validates("longitude")
+    def validate_longitude(self, key, value):
+        if not isinstance(value, (int, float)):
+            raise ValueError("longitude must be a number")
+        if value < -180 or value > 180:
+            raise ValueError("longitude must be between -180 and 180")
+        return float(value)
 
-        if not place:
-            return {'error': 'Place not found'}, 404
+    @validates("owner_id")
+    def validate_owner_id(self, key, value):
+        if not value:
+            raise ValueError("owner_id is required")
+        return value
 
-        if not getattr(place, 'owner', None) or str(place.owner.id) != str(current_user_id):
-            return {'error': 'Unauthorized action'}, 403
+    def validate(self):
+        if not self.title:
+            raise ValueError("title is required")
+        if not self.owner_id:
+            raise ValueError("owner_id is required")
 
-        data = api.payload or {}
+    def add_amenity(self, amenity):
+        if amenity not in self.amenities:
+            self.amenities.append(amenity)
 
-        if 'owner_id' in data:
-            data.pop('owner_id')
-
-        try:
-            updated_place = facade.update_place(place_id, data)
-        except ValueError as e:
-            return {'error': str(e)}, 400
-
-        return place_to_response(updated_place), 200
+    def to_dict(self):
+        place_dict = super().to_dict()
+        place_dict["amenities"] = [amenity.id for amenity in self.amenities]
+        return place_dict

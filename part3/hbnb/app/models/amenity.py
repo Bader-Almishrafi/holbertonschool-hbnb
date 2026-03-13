@@ -1,14 +1,26 @@
-# part2/hbnb/app/models/amenity.py
+from sqlalchemy.orm import validates
+from hbnb.app import db
 from hbnb.app.models.base_model import BaseModel
 
+
 class Amenity(BaseModel):
+    __tablename__ = 'amenities'
+
+    name = db.Column(db.String(100), nullable=False, unique=True)
+
     def __init__(self, name):
-        super().__init__()
         self.name = name
         self.validate()
 
-    def validate(self):
-        if not isinstance(self.name, str) or not self.name.strip():
+    @validates("name")
+    def validate_name(self, key, value):
+        if not isinstance(value, str) or not value.strip():
             raise ValueError("name is required")
-        if len(self.name.strip()) > 50:
-            raise ValueError("name max length is 50")
+        value = value.strip()
+        if len(value) > 100:
+            raise ValueError("name max length is 100")
+        return value
+
+    def validate(self):
+        if not self.name:
+            raise ValueError("name is required")

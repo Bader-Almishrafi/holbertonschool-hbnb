@@ -15,6 +15,20 @@ class User(BaseModel):
     password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
+    places = db.relationship(
+        'Place',
+        backref='owner',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+    reviews = db.relationship(
+        'Review',
+        backref='user',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
     def __init__(self, first_name, last_name, email, password, is_admin=False):
         self.first_name = first_name
         self.last_name = last_name
