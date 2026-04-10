@@ -29,13 +29,13 @@ class User(BaseModel):
         cascade='all, delete-orphan'
     )
 
-    def __init__(self, first_name, last_name, email, password, is_admin=False):
+    def __init__(self, first_name, last_name, email, password, is_admin=False, **kwargs):
+        super().__init__(**kwargs)
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.is_admin = bool(is_admin)
         self.hash_password(password)
-        self.validate()
 
     @validates("first_name")
     def validate_first_name(self, key, value):

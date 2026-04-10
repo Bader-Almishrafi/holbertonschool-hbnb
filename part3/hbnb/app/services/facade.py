@@ -14,8 +14,11 @@ class HBnBFacade:
         self.place_repo = SQLAlchemyRepository(Place)
         self.review_repo = SQLAlchemyRepository(Review)
 
-    # ---------- Users ----------
     def create_user(self, user_data):
+        existing_user = self.user_repo.get_by_email(user_data.get("email"))
+        if existing_user:
+            raise ValueError("Email already registered")
+
         user = User(**user_data)
         self.user_repo.add(user)
         return user
@@ -30,9 +33,8 @@ class HBnBFacade:
         return self.user_repo.update(user_id, user_data)
 
     def get_user_by_email(self, email):
-        return self.user_repo.get_user_by_email(email)
+        return self.user_repo.get_by_email(email)
 
-    # ---------- Amenities ----------
     def create_amenity(self, amenity_data):
         amenity = Amenity(**amenity_data)
         self.amenity_repo.add(amenity)
@@ -47,7 +49,6 @@ class HBnBFacade:
     def update_amenity(self, amenity_id, amenity_data):
         return self.amenity_repo.update(amenity_id, amenity_data)
 
-    # ---------- Places ----------
     def create_place(self, place_data):
         owner_id = place_data.get("owner_id")
         owner = self.get_user(owner_id)
@@ -112,11 +113,11 @@ class HBnBFacade:
 
         if data:
             place.update(data)
+        else:
+            db.session.commit()
 
-        db.session.commit()
         return place
 
-    # ---------- Reviews ----------
     def create_review(self, review_data):
         user_id = review_data.get("user_id")
         place_id = review_data.get("place_id")

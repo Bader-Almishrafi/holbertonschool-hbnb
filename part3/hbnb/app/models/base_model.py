@@ -18,6 +18,8 @@ class BaseModel(db.Model):
 
     def save(self):
         self.updated_at = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
     def update(self, data):
         for key, value in (data or {}).items():
@@ -26,10 +28,14 @@ class BaseModel(db.Model):
             if hasattr(self, key):
                 setattr(self, key, value)
 
-        self.save()
-
         if hasattr(self, "validate") and callable(getattr(self, "validate")):
             self.validate()
+
+        self.save()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def to_dict(self):
         result = {}
