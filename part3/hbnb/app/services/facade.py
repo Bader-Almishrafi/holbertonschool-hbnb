@@ -2,17 +2,19 @@ from hbnb.app.models.user import User
 from hbnb.app.models.amenity import Amenity
 from hbnb.app.models.place import Place
 from hbnb.app.models.review import Review
-from hbnb.app.persistence.repository import SQLAlchemyRepository
 from hbnb.app.persistence.user_repository import UserRepository
+from hbnb.app.persistence.amenity_repository import AmenityRepository
+from hbnb.app.persistence.place_repository import PlaceRepository
+from hbnb.app.persistence.review_repository import ReviewRepository
 from hbnb.app import db
 
 
 class HBnBFacade:
     def __init__(self):
         self.user_repo = UserRepository()
-        self.amenity_repo = SQLAlchemyRepository(Amenity)
-        self.place_repo = SQLAlchemyRepository(Place)
-        self.review_repo = SQLAlchemyRepository(Review)
+        self.amenity_repo = AmenityRepository()
+        self.place_repo = PlaceRepository()
+        self.review_repo = ReviewRepository()
 
     def create_user(self, user_data):
         existing_user = self.user_repo.get_by_email(user_data.get("email"))
@@ -147,7 +149,10 @@ class HBnBFacade:
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        return Review.query.filter_by(place_id=place_id).all()
+        place = self.get_place(place_id)
+        if not place:
+            return []
+        return place.reviews
 
     def update_review(self, review_id, review_data):
         data = dict(review_data or {})

@@ -1,7 +1,7 @@
-from hbnb.app.models.place import Place
+from hbnb.app.models.review import Review
 from hbnb.app.persistence.repository import SQLAlchemyRepository
 
 
-class PlaceRepository(SQLAlchemyRepository):
+class ReviewRepository(SQLAlchemyRepository):
     def __init__(self):
-        super().__init__(Place)
+        super().__init__(Review)

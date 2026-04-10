@@ -8,7 +8,8 @@ class Amenity(BaseModel):
 
     name = db.Column(db.String(255), nullable=False, unique=True)
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
+        super().__init__(**kwargs)
         self.name = name
         self.validate()
 

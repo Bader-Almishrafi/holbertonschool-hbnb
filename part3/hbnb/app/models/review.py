@@ -14,7 +14,8 @@ class Review(BaseModel):
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
 
-    def __init__(self, text, rating, user_id=None, place_id=None):
+    def __init__(self, text, rating, user_id=None, place_id=None, **kwargs):
+        super().__init__(**kwargs)
         self.text = text
         self.rating = rating
         self.user_id = user_id

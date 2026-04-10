@@ -2,6 +2,12 @@ from sqlalchemy.orm import validates
 from hbnb.app import db
 from hbnb.app.models.base_model import BaseModel
 
+place_amenity = db.Table(
+    'place_amenity',
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+)
+
 
 class Place(BaseModel):
     __tablename__ = 'places'
@@ -11,9 +17,24 @@ class Place(BaseModel):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    owner_id = db.Column(db.String(36), nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
-    def __init__(self, title, description=None, price=0, latitude=0.0, longitude=0.0, owner_id=None):
+    reviews = db.relationship(
+        'Review',
+        backref='place',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+    amenities = db.relationship(
+        'Amenity',
+        secondary=place_amenity,
+        lazy='subquery',
+        backref=db.backref('places', lazy=True)
+    )
+
+    def __init__(self, title, description=None, price=0, latitude=0.0, longitude=0.0, owner_id=None, **kwargs):
+        super().__init__(**kwargs)
         self.title = title
         self.description = description
         self.price = price
@@ -74,3 +95,12 @@ class Place(BaseModel):
             raise ValueError("title is required")
         if not self.owner_id:
             raise ValueError("owner_id is required")
+
+    def add_amenity(self, amenity):
+        if amenity not in self.amenities:
+            self.amenities.append(amenity)
+
+    def to_dict(self):
+        place_dict = super().to_dict()
+        place_dict["amenities"] = [amenity.id for amenity in self.amenities]
+        return place_dict
