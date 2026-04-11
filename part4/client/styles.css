@@ -35,3 +35,30 @@ main {
   color: red;
   margin-top: 10px;
 }
+
+.place-details {
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.place-info {
+  margin-bottom: 20px;
+}
+
+.review-card {
+  margin: 20px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.add-review {
+  margin: 20px;
+}
+
+#review-message {
+  margin-top: 10px;
+  font-weight: bold;
+}
