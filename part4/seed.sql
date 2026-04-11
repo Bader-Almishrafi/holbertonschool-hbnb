@@ -1,4 +1,5 @@
 PRAGMA foreign_keys = ON;
+-- initial values 
 
 INSERT INTO users (
     id,
