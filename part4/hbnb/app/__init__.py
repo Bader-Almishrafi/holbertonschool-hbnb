@@ -1,0 +1,59 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_restx import Api
+from flask_jwt_extended import JWTManager
+
+db = SQLAlchemy()
+bcrypt = Bcrypt()
+jwt = JWTManager()
+
+from hbnb.app.services import facade
+
+
+def create_app(config_class="hbnb.config.DevelopmentConfig"):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
+
+    api = Api(
+        app,
+        version="1.0",
+        title="HBnB API",
+        description="HBnB Application API",
+        doc="/api/v1/"
+    )
+
+    from hbnb.app.api.v1.users import api as users_ns
+    from hbnb.app.api.v1.amenities import api as amenities_ns
+    from hbnb.app.api.v1.places import api as places_ns
+    from hbnb.app.api.v1.reviews import api as reviews_ns
+    from hbnb.app.api.v1.auth import api as auth_ns
+
+    api.add_namespace(users_ns, path="/api/v1/users")
+    api.add_namespace(amenities_ns, path="/api/v1/amenities")
+    api.add_namespace(places_ns, path="/api/v1/places")
+    api.add_namespace(reviews_ns, path="/api/v1/reviews")
+    api.add_namespace(auth_ns, path="/api/v1/auth")
+
+    with app.app_context():
+        db.create_all()
+
+        from hbnb.app.models.user import User
+
+        admin = User.query.filter_by(email="admin@example.com").first()
+        if not admin:
+            admin = User(
+                first_name="Admin",
+                last_name="User",
+                email="admin@example.com",
+                password="123456",
+                is_admin=True
+            )
+            db.session.add(admin)
+            db.session.commit()
+
+    return app
