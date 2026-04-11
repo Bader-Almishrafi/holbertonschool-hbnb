@@ -1,4 +1,3 @@
-
 # HBnB - Simple Web Client (Part 4)
 
 ## Overview
