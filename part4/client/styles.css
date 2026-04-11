@@ -30,3 +30,8 @@ nav a {
 main {
     padding: 2rem;
 }
+
+#error-message {
+  color: red;
+  margin-top: 10px;
+}
