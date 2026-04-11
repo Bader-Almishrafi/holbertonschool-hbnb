@@ -28,9 +28,9 @@ def place_to_response(place):
         'id': place.id,
         'title': place.title,
         'description': place.description,
-        'price': place.price,
-        'latitude': place.latitude,
-        'longitude': place.longitude,
+        'price': float(place.price) if place.price is not None else None,
+        'latitude': float(place.latitude) if place.latitude is not None else None,
+        'longitude': float(place.longitude) if place.longitude is not None else None,
         'owner_id': place.owner_id,
         'amenities': [amenity.id for amenity in place.amenities]
     }
@@ -38,11 +38,13 @@ def place_to_response(place):
 
 @api.route('/')
 class PlaceList(Resource):
+
     @api.response(200, 'Places retrieved successfully')
     def get(self):
         """Retrieve all places (public)"""
         places = facade.get_all_places()
         return [place_to_response(place) for place in places], 200
+
 
     @jwt_required()
     @api.expect(place_create_model, validate=True)
@@ -50,6 +52,7 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Create a new place for the authenticated user"""
+
         current_user_id = get_jwt_identity()
         data = api.payload or {}
 
@@ -73,14 +76,19 @@ class PlaceList(Resource):
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
+
     @api.response(200, 'Place details retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get place details by ID (public)"""
+
         place = facade.get_place(place_id)
+
         if not place:
             return {'error': 'Place not found'}, 404
+
         return place_to_response(place), 200
+
 
     @jwt_required()
     @api.expect(place_update_model, validate=True)
@@ -89,12 +97,14 @@ class PlaceResource(Resource):
     @api.response(403, 'Unauthorized action')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        """Update a place; admin bypasses ownership restriction"""
+        """Update a place"""
+
         current_user_id = get_jwt_identity()
         claims = get_jwt()
         is_admin = claims.get('is_admin', False)
 
         place = facade.get_place(place_id)
+
         if not place:
             return {'error': 'Place not found'}, 404
 

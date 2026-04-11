@@ -101,6 +101,15 @@ class Place(BaseModel):
             self.amenities.append(amenity)
 
     def to_dict(self):
-        place_dict = super().to_dict()
-        place_dict["amenities"] = [amenity.id for amenity in self.amenities]
-        return place_dict
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "price": float(self.price) if self.price is not None else None,
+            "latitude": float(self.latitude) if self.latitude is not None else None,
+            "longitude": float(self.longitude) if self.longitude is not None else None,
+            "owner_id": self.owner_id,
+            "amenities": [amenity.id for amenity in self.amenities],
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+        }

@@ -1,64 +1,295 @@
-/* 
-  This is a SAMPLE File to get you started. Follow the instructions on the project to complete the tasks. 
-  You'll probably need to override some of theese styles.
-*/
-
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #ff5a5f;
+  --primary-dark: #e14b50;
+  --text: #222222;
+  --muted: #6b7280;
+  --border: #dddddd;
+  --bg: #f7f7f7;
+  --white: #ffffff;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --radius: 10px;
 }
 
 body {
-    background-color: #f4f4f4;
-    color: #333;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
 }
 
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  height: 48px;
+  width: auto;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 nav a {
-    color: #fff;
-    text-decoration: none;
-    margin-left: 1rem;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+nav a:hover {
+  color: var(--primary);
+}
+
+.login-button,
+.details-button,
+button[type="submit"] {
+  display: inline-block;
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.login-button:hover,
+.details-button:hover,
+button[type="submit"]:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 main {
-    padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
 }
 
-#error-message {
-  color: red;
-  margin-top: 10px;
+h1,
+h2,
+h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+#filter {
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#filter label {
+  font-weight: 700;
+}
+
+#price-filter {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--white);
+  font-size: 1rem;
+}
+
+#places-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px;
+}
+
+.place-card {
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 20px;
+  padding: 10px;
+  box-shadow: var(--shadow);
+  transition: 0.2s ease;
+}
+
+.place-card:hover {
+  transform: translateY(-4px);
+}
+
+.place-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.place-card p {
+  margin: 8px 0;
+  color: #444;
 }
 
 .place-details {
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   margin: 20px;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  box-shadow: var(--shadow);
 }
 
 .place-info {
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.place-info:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.place-info ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
 }
 
 .review-card {
+  background-color: #fffafa;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   margin: 20px 0;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
 }
 
 .add-review {
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   margin: 20px;
+  padding: 10px;
+  box-shadow: var(--shadow);
 }
 
+.form,
+#login-form {
+  max-width: 520px;
+  margin: 30px auto;
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.form h2,
+#login-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form label,
+#login-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.form input,
+.form textarea,
+.form select,
+#login-form input,
+#login-form textarea,
+#login-form select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+.form textarea,
+#login-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.form input:focus,
+.form textarea:focus,
+.form select:focus,
+#login-form input:focus,
+#login-form textarea:focus,
+#login-form select:focus,
+#price-filter:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 90, 95, 0.15);
+}
+
+#error-message,
 #review-message {
   margin-top: 10px;
-  font-weight: bold;
+  text-align: center;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--white);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 14px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  main {
+    padding: 24px 14px 40px;
+  }
+
+  .place-card,
+  .place-details,
+  .add-review {
+    margin: 12px 0;
+  }
+
+  .form,
+  #login-form {
+    padding: 20px;
+    margin: 20px auto;
+  }
 }

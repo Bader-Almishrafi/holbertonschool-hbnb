@@ -1,52 +1,76 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Review</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" href="images/icon.png" />
-  </head>
 
-  <body>
-    <header>
-      <img src="images/logo.png" class="logo" alt="logo" />
+<head>
 
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="login.html" id="login-link" class="login-button">Login</a>
-      </nav>
-    </header>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <main>
-      <section class="add-review">
-        <form class="form" id="review-form">
-          <h2>Add Review</h2>
+<title>Add Review</title>
 
-          <label for="review-text">Review</label>
-          <textarea id="review-text" required></textarea>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="images/icon.png">
 
-          <label for="rating">Rating</label>
-          <select id="rating" required>
-            <option value="">Select rating</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
+</head>
 
-          <button type="submit">Submit</button>
 
-          <p id="review-message"></p>
-        </form>
-      </section>
-    </main>
+<body>
 
-    <footer>
-      <p>All rights reserved</p>
-    </footer>
 
-    <script src="scripts.js"></script>
-  </body>
+<header>
+
+<img src="images/logo.png" class="logo" alt="logo">
+
+<nav>
+<a href="index.html">Home</a>
+<a href="login.html" id="login-link" class="login-button">Login</a>
+</nav>
+
+</header>
+
+
+<main>
+
+<section class="add-review">
+
+<form id="review-form" class="form">
+
+<h2>Add Review</h2>
+
+<label for="review-text">Review</label>
+<textarea id="review-text" required></textarea>
+
+
+<label for="rating">Rating</label>
+<select id="rating" required>
+
+<option value="">Select rating</option>
+
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+
+</select>
+
+<button type="submit">Submit Review</button>
+
+<p id="review-message"></p>
+
+</form>
+
+</section>
+
+</main>
+
+
+<footer>
+<p>All rights reserved</p>
+</footer>
+
+
+<script src="scripts.js"></script>
+
+</body>
 </html>
