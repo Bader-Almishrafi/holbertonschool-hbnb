@@ -7,4 +7,6 @@ class UserRepository(SQLAlchemyRepository):
         super().__init__(User)
 
     def get_by_email(self, email):
-        return self.get_by_attribute("email", email)
+        if not email:
+            return None
+        return self.get_by_attribute("email", email.strip().lower())
